@@ -21,7 +21,26 @@ $host = explode(".",$_SERVER['HTTP_HOST']);
 		exit();
 	}
 }
+if( isset($_SERVER['HTTP']) && $_SERVER['HTTP'] == 'off')
+{
 
+	//$url = 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+	$url = 'https://www' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+	header("Location: " . $url);
+	exit();
+}
+if( isset($_SERVER['HTTP']) && $_SERVER['HTTP'] == 'on')
+{
+
+$host = null;
+$host = explode(".",$_SERVER['HTTP_HOST']);
+	if($host[0] != "www")
+	{
+		$url = 'https://www.' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+		header("Location: " . $url);
+		exit();
+	}
+}
 ?>
 <html lang="en-US">
 <head>
