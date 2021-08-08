@@ -1,0 +1,265 @@
+en
+conf t
+ip routing
+
+vlan 4
+name Class1
+vlan 5
+name Class2
+vlan 6
+name Class3
+vlan 7
+name Class4
+vlan 8
+name Class5
+vlan 9
+name Class6
+
+vlan 10
+name Sever
+vlan 11
+name Admin
+vlan 2
+name Faculty
+vlan 3
+name IT
+
+int vlan 11
+ip add 172.16.3.65 255.255.255.224
+no shut
+exit
+
+banner motd "Unauthorized users will be prosecuted."
+hostname Austin-MultiSw
+enable secret class
+line con 0
+logging synchronous
+password cisco
+login
+exit
+no ip domain-lookup
+ip domain-name QuantumTTC.com
+crypto key gen rsa
+1024
+ip ssh version 2
+ip ssh time-out 60
+ip ssh authentication-retries 2
+username ITSupport privilege 1 secret Staff123
+ip access-list standard ITSUPPORT_ACL
+permit 172.16.3.96 0.0.0.15
+deny any
+exit
+line vty 0 15
+transport input ssh
+login local
+access-class ITSUPPORT_ACL in
+exit
+
+!!!!!!connect to g0/0 gateway
+interface FastEthernet0/15
+ no switchport
+ ip address 172.16.3.121 255.255.255.248
+no shut
+exit
+
+!!!!!!connect to g0/1 gateway backup
+interface FastEthernet0/16
+ no switchport
+ ip address 172.16.3.129 255.255.255.248
+no shut
+exit
+
+
+!!!!!!!!ethernetchannel 1 msw1 to msw2backup
+interface Port-channel 1
+switchport trunk encapsulation dot1q
+switchport mode trunk
+switchport trunk native vlan 11
+exit
+interface range f0/1-4
+switchport trunk encapsulation dot1q
+switchport mode trunk
+switchport trunk native vlan 11
+channel-protocol lacp
+channel-group 1 mode active
+no shut
+exit
+
+int range f0/19-24
+switchport trunk encapsulation dot1q
+switchport mode trunk
+switchport trunk native vlan 11
+exit
+
+int range f0/5-14,f0/17-18
+switchport nonegotiate
+shut
+exit
+int range g0/1-2
+shut
+exit
+
+!!!!vlan 9 stand by and dhcp
+int vlan 9
+ip add 172.16.2.189 255.255.255.128
+standby ip 172.16.2.191
+standby priority 150
+standby preempt
+no shut
+exit
+ip dhcp excluded-address 172.16.2.189 172.16.2.255
+ip dhcp excluded-address 172.16.2.128
+ip dhcp pool DHCP_POOL_VLAN_9
+default-router 172.16.2.191 
+network 172.16.2.128 255.255.255.128
+dns-server 172.16.3.116
+exit
+
+!!!!vlan 8 stand by and dhcp
+int vlan 8
+ip add 172.16.2.61 255.255.255.128
+standby ip 172.16.2.63
+standby priority 150
+standby preempt
+no shut
+exit
+ip dhcp excluded-address 172.16.2.61 172.16.2.127
+ip dhcp excluded-address 172.16.2.0
+ip dhcp pool DHCP_POOL_VLAN_8
+default-router 172.16.2.63
+network 172.16.2.0 255.255.255.128
+dns-server 172.16.3.116
+exit
+
+!!!!vlan 7 stand by and dhcp
+int vlan 7
+ip add 172.16.1.189 255.255.255.128
+standby ip 172.16.1.191
+standby priority 150
+standby preempt
+no shut
+exit
+ip dhcp excluded-address 172.16.1.189 172.16.1.255
+ip dhcp excluded-address 172.16.1.128
+ip dhcp pool DHCP_POOL_VLAN_7
+default-router 172.16.1.191
+network 172.16.1.128 255.255.255.128
+dns-server 172.16.3.116
+exit
+
+!!!!vlan 6 stand by and dhcp
+int vlan 6
+ip add 172.16.1.61 255.255.255.128
+standby ip 172.16.1.63
+standby priority 150
+standby preempt
+no shut
+exit
+ip dhcp excluded-address 172.16.1.61 172.16.1.127
+ip dhcp excluded-address 172.16.1.0
+ip dhcp pool DHCP_POOL_VLAN_6
+default-router 172.16.1.63
+network 172.16.1.0 255.255.255.128
+dns-server 172.16.3.116
+exit
+
+!!!!vlan 5 stand by and dhcp
+int vlan 5
+ip add 172.16.0.189 255.255.255.128
+standby ip 172.16.0.191
+standby priority 150
+standby preempt
+no shut
+exit
+ip dhcp excluded-address 172.16.0.189 172.16.0.255
+ip dhcp excluded-address 172.16.0.128
+ip dhcp pool DHCP_POOL_VLAN_5
+default-router 172.16.0.191
+network 172.16.0.128 255.255.255.128
+dns-server 172.16.3.116
+exit
+
+!!!!vlan 4 stand by and dhcp
+int vlan 4
+ip add 172.16.0.61 255.255.255.128
+standby ip 172.16.0.63
+standby priority 150
+standby preempt
+no shut
+exit
+ip dhcp excluded-address 172.16.0.61 172.16.0.127
+ip dhcp excluded-address 172.16.0.0
+ip dhcp pool DHCP_POOL_VLAN_4
+default-router 172.16.0.63
+network 172.16.0.0 255.255.255.128
+dns-server 172.16.3.116
+exit
+
+!!!!vlan 2 stand by and dhcp
+int vlan 2
+ip add 172.16.3.31 255.255.255.192
+standby ip 172.16.3.33
+standby priority 150
+standby preempt
+no shut
+exit
+ip dhcp excluded-address 172.16.3.31 172.16.3.63
+ip dhcp excluded-address 172.16.3.0
+ip dhcp pool DHCP_POOL_VLAN_2
+default-router 172.16.3.33
+network 172.16.3.0 255.255.255.192
+dns-server 172.16.3.116
+exit
+
+!!!!vlan 11 stand by and dhcp  da exclude network and broadcast
+int vlan 11
+
+standby ip 172.16.3.79
+standby priority 150
+standby preempt
+no shut
+exit
+ip dhcp excluded-address 172.16.3.64 172.16.3.79
+ip dhcp excluded-address 172.16.3.95
+ip dhcp pool DHCP_POOL_VLAN_11
+default-router 172.16.3.79
+network 172.16.3.64 255.255.255.224
+dns-server 172.16.3.116
+exit
+
+!!!!vlan 3 stand by and dhcp  da exclude network and broadcast
+int vlan 3
+ip add 172.16.3.97 255.255.255.240
+standby ip 172.16.3.99
+standby priority 150
+standby preempt
+no shut
+exit
+ip dhcp excluded-address 172.16.3.96 172.16.3.105 
+ip dhcp excluded-address 172.16.3.111
+ip dhcp pool DHCP_POOL_VLAN_3
+default-router 172.16.3.99
+network 172.16.3.96 255.255.255.240
+dns-server 172.16.3.116
+exit
+
+router ospf 1
+ passive-interface FastEthernet0/19
+ passive-interface FastEthernet0/20
+ passive-interface FastEthernet0/21
+ passive-interface FastEthernet0/22
+ passive-interface FastEthernet0/23
+ passive-interface FastEthernet0/24
+ network 172.16.0.0 0.0.0.127 area 0
+ network 172.16.0.128 0.0.0.127 area 0
+ network 172.16.1.0 0.0.0.127 area 0
+ network 172.16.1.128 0.0.0.127 area 0
+ network 172.16.2.0 0.0.0.127 area 0
+ network 172.16.2.128 0.0.0.127 area 0
+ network 172.16.3.0 0.0.0.63 area 0
+ network 172.16.3.64 0.0.0.31 area 0
+ network 172.16.3.96 0.0.0.15 area 0
+ network 172.16.3.112 0.0.0.7 area 0
+ network 172.16.3.120 0.0.0.7 area 0
+ network 172.16.3.128 0.0.0.7 area 0
+exit

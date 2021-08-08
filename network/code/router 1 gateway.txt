@@ -1,0 +1,107 @@
+en
+conf t
+hostname Austin-Gateway
+
+banner motd "Unauthorized users will be prosecuted."
+enable secret class
+line con 0
+logging synchronous
+password cisco
+login
+exit
+no ip domain-lookup
+ip domain-name QuantumTTC.com
+crypto key gen rsa
+1024
+ip ssh version 2
+ip ssh time-out 60
+ip ssh authentication-retries 2
+username ITSupport privilege 1 secret Staff123
+ip access-list standard ITSUPPORT_ACL
+permit 172.16.3.96 0.0.0.15
+deny any
+exit
+line vty 0 15
+transport input ssh
+login local
+access-class ITSUPPORT_ACL in
+exit
+
+!!!!! to multi sw 1 on f0/15
+interface GigabitEthernet0/0
+ ip address 172.16.3.122 255.255.255.248
+ standby 0 ip 172.16.3.125
+ standby priority 150
+ standby preempt
+no shut
+exit
+
+!!!!! to multi sw 1 backup on f0/16 
+interface GigabitEthernet0/1
+ ip address 172.16.3.132 255.255.255.248
+ standby 0 ip 172.16.3.133
+ standby priority 150
+ standby preempt
+no shut
+exit
+
+!!! to frame relay on int s0/1/0
+int s0/0/1
+ip add 172.16.3.153 255.255.255.252
+no shut
+exit
+
+!!!!! to isp
+int s0/0/0
+ip add 196.20.30.193 255.255.255.252
+no shut
+exit
+
+
+!!!!! ppp authentication with chap
+username ISP3 secret cisco 
+interface serial0/0/0 
+encapsulation ppp 
+ppp authentication chap 
+exit
+
+!!!!!!overload pad
+ip route 0.0.0.0 0.0.0.0 196.20.30.194
+access-list 1 permit 172.16.0.0 0.0.0.127
+access-list 1 permit 172.16.0.128 0.0.0.127
+access-list 1 permit 172.16.1.0 0.0.0.127
+access-list 1 permit 172.16.1.128 0.0.0.127
+access-list 1 permit 172.16.2.0 0.0.0.127
+access-list 1 permit 172.16.2.128 0.0.0.127
+access-list 1 permit 172.16.3.0 0.0.0.63
+access-list 1 permit 172.16.3.64 0.0.0.31
+access-list 1 permit 172.16.3.96 0.0.0.15
+access-list 1 permit 172.16.3.112 0.0.0.7
+
+ip nat pool INTERNET_ACCESS 196.20.30.1 196.20.30.62 netmask 255.255.255.192
+ip nat inside source list 1 pool INTERNET_ACCESS overload
+int g0/0
+ip nat inside
+exit
+int g0/1
+ip nat inside
+exit
+int s0/0/1
+ip nat inside
+exit
+int s0/0/0
+ip nat outside
+exit
+
+router ospf 1
+default-information originate
+ network 172.16.3.120 0.0.0.7 area 0
+ network 172.16.3.128 0.0.0.7 area 0
+ network 172.16.3.152 0.0.0.3 area 0
+exit
+!========================================
+
+
+
+
+

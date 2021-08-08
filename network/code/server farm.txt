@@ -1,0 +1,56 @@
+en
+conf t
+vlan 4
+name Class1
+vlan 5
+name Class2
+vlan 6
+name Class3
+vlan 7
+name Class4
+vlan 8
+name Class5
+vlan 9
+name Class6
+
+vlan 10
+name Sever
+vlan 11
+name Admin
+vlan 2
+name Faculty
+vlan 3
+name IT
+
+ip default-gateway 172.16.3.113
+
+int vlan 10
+ip add 172.16.3.114 255.255.255.248
+no shut
+exit
+
+int f0/2
+switchport mode trunk
+switchport trunk native vlan 10
+exit
+
+int range f0/3-5
+switchport mode access
+switchport access vlan 10
+exit
+
+int range f0/2-5
+switchport port-security 
+switchport port-security maximum 1
+switchport port-security violation restrict
+switchport port-security mac-address sticky
+exit
+
+int range f0/6-24
+switchport nonegotiate
+shut
+exit
+int range g0/1-2
+shut
+exit
+

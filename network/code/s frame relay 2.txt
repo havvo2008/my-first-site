@@ -1,0 +1,38 @@
+!!!!!!FR2: to FR1
+int s0/0/0
+encapsulation frame-relay
+no shut
+int s0/0/0.201 point-to-point
+ip add 172.16.3.138 255.255.255.252
+bandwidth 64
+frame-relay interface-dlci 201
+exit
+
+!!!!!!FR2: to FR3
+int s0/0/0
+encapsulation frame-relay
+no shut
+int s0/0/0.203 point-to-point
+ip add 172.16.3.141 255.255.255.252
+bandwidth 64
+frame-relay interface-dlci 203
+exit
+
+router ospf 1
+ log-adjacency-changes
+ network 172.16.3.136 0.0.0.3 area 0
+ network 172.16.3.140 0.0.0.3 area 0
+ network 172.18.1.0 0.0.0.7 area 0
+exit
+
+!!============need code from kevin and change router ospf if needed
+interface Serial0/1/0
+ ip address 172.18.0.185 255.255.255.248
+ no shut
+exit
+!
+interface Serial0/1/1
+ ip address 172.18.1.1 255.255.255.248
+ no shut
+exit
+!

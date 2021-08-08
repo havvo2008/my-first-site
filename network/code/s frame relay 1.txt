@@ -1,0 +1,47 @@
+!!!!to server farm
+int g0/0
+ip add 172.16.3.113 255.255.255.248
+no shut
+exit
+
+!!!!!to gateway s0/0/1
+int s0/1/0
+ip add 172.16.3.154 255.255.255.252
+no shut
+exit
+
+!!!!!to gateway backup s0/0/1
+int s0/0/1
+ip add 172.16.3.150 255.255.255.252
+no shut
+exit
+
+!!!!!!------------FR1---------------------------
+!!!!FR1: to FR2
+int s0/0/0
+encapsulation frame-relay
+no shut
+int s0/0/0.102 point-to-point
+ip add 172.16.3.137 255.255.255.252
+bandwidth 64
+frame-relay interface-dlci 102
+exit
+
+!!!!FR1: to FR3
+int s0/0/0
+encapsulation frame-relay
+no shut
+int s0/0/0.103 point-to-point
+ip add 172.16.3.146 255.255.255.252
+bandwidth 64
+frame-relay interface-dlci 103
+exit
+
+!!!!!ospf 1
+router ospf 1
+network 172.16.3.112 0.0.0.7 area 0
+network 172.16.3.152 0.0.0.3 area 0
+network 172.16.3.148 0.0.0.3 area 0
+network 172.16.3.136 0.0.0.3 area 0
+network 172.16.3.144 0.0.0.3 area 0
+exit

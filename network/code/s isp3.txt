@@ -1,0 +1,40 @@
+en
+conf t
+hostname ISP3
+
+!!!!!public connect to Austin-Gateway R1
+int s0/1/0
+ip add 196.20.30.194 255.255.255.252
+no shut
+exit
+
+!!!!!public connect to Austin-Gateway-Backup R2
+int s0/1/1
+ip add 196.20.30.198 255.255.255.252
+no shut
+exit
+
+!!!!!!!ppp authentication chap Austin-Gateway
+username Austin-Gateway secret cisco 
+interface s0/1/0 
+encapsulation ppp 
+ppp authentication chap 
+
+!!!!!!!ppp authentication chap Austin-Gateway-Backup
+username Austin-Gateway-Backup secret cisco 
+interface s0/1/1
+encapsulation ppp 
+ppp authentication chap
+exit
+
+!!!!!!overload pad static route to router 1 & 2
+ip route 196.20.30.0 255.255.255.192 196.20.30.193
+ip route 196.20.30.0 255.255.255.192 196.20.30.197
+
+!!!!!create loop 0 to connecte internet 
+int loop 0
+ip add 10.10.10.10 255.255.255.255
+no shut
+exit
+================================================
+
